@@ -1,0 +1,402 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Interactive 3D Sneaker</title>
+  <style>
+    * { box-sizing: border-box; }
+
+    :root {
+      --bg: #07090d;
+      --panel: rgba(255,255,255,0.07);
+      --text: #f7f7f7;
+      --muted: #a9b0bd;
+      --accent: #8cffb1;
+    }
+
+    html, body {
+      margin: 0;
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      background:
+        radial-gradient(circle at 50% 35%, #18201d 0%, #0b0e12 42%, #050609 100%);
+      font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      color: var(--text);
+    }
+
+    #app {
+      position: relative;
+      width: 100%;
+      height: 100%;
+    }
+
+    canvas {
+      display: block;
+      width: 100%;
+      height: 100%;
+      cursor: grab;
+    }
+
+    canvas:active { cursor: grabbing; }
+
+    .copy {
+      position: absolute;
+      top: 28px;
+      left: 28px;
+      z-index: 2;
+      max-width: 340px;
+      padding: 18px 20px;
+      border: 1px solid rgba(255,255,255,0.11);
+      border-radius: 18px;
+      background: var(--panel);
+      backdrop-filter: blur(14px);
+      box-shadow: 0 20px 60px rgba(0,0,0,0.25);
+      pointer-events: none;
+    }
+
+    .eyebrow {
+      color: var(--accent);
+      font-size: 0.75rem;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      font-weight: 800;
+    }
+
+    h1 {
+      margin: 7px 0 8px;
+      font-size: clamp(1.7rem, 4vw, 3.2rem);
+      line-height: 0.95;
+      letter-spacing: -0.055em;
+    }
+
+    p {
+      margin: 0;
+      color: var(--muted);
+      line-height: 1.5;
+      font-size: 0.94rem;
+    }
+
+    .badge {
+      position: absolute;
+      right: 24px;
+      bottom: 24px;
+      z-index: 2;
+      padding: 11px 14px;
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 999px;
+      background: rgba(7,9,13,0.55);
+      color: #dfe5ed;
+      font-size: 0.8rem;
+      backdrop-filter: blur(10px);
+      pointer-events: none;
+    }
+
+    @media (max-width: 600px) {
+      .copy {
+        top: 16px;
+        left: 16px;
+        right: 16px;
+        max-width: none;
+        padding: 14px 16px;
+      }
+
+      .badge {
+        right: 14px;
+        bottom: 14px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div id="app">
+    <div class="copy">
+      <div class="eyebrow">Interactive product demo</div>
+      <h1>GOJO RUNNER</h1>
+      <p>Move your cursor or drag to rotate. Scroll to zoom. On mobile, drag with one finger.</p>
+    </div>
+
+    <div class="badge">Procedural Three.js sneaker</div>
+  </div>
+
+  <script type="module">
+    import * as THREE from "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js";
+    import { OrbitControls } from "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/controls/OrbitControls.js";
+
+    const app = document.querySelector("#app");
+
+    const scene = new THREE.Scene();
+    scene.fog = new THREE.Fog(0x07090d, 8, 18);
+
+    const camera = new THREE.PerspectiveCamera(
+      38,
+      window.innerWidth / window.innerHeight,
+      0.1,
+      100
+    );
+    camera.position.set(7.4, 3.6, 8.4);
+
+    const renderer = new THREE.WebGLRenderer({
+      antialias: true,
+      alpha: true
+    });
+
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.outputColorSpace = THREE.SRGBColorSpace;
+    renderer.shadowMap.enabled = true;
+    renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+    app.appendChild(renderer.domElement);
+
+    const controls = new OrbitControls(camera, renderer.domElement);
+    controls.enableDamping = true;
+    controls.dampingFactor = 0.055;
+    controls.enablePan = false;
+    controls.minDistance = 6;
+    controls.maxDistance = 13;
+    controls.target.set(0, 0.35, 0);
+
+    const shoe = new THREE.Group();
+    shoe.rotation.set(-0.08, -0.55, 0.03);
+    shoe.position.y = 0.15;
+    scene.add(shoe);
+
+    const materials = {
+      upper: new THREE.MeshStandardMaterial({
+        color: 0xe9ecef,
+        roughness: 0.72,
+        metalness: 0.02
+      }),
+      upperDark: new THREE.MeshStandardMaterial({
+        color: 0x181d25,
+        roughness: 0.6
+      }),
+      sole: new THREE.MeshStandardMaterial({
+        color: 0xf6f2e8,
+        roughness: 0.78
+      }),
+      outsole: new THREE.MeshStandardMaterial({
+        color: 0x252a31,
+        roughness: 0.82
+      }),
+      accent: new THREE.MeshStandardMaterial({
+        color: 0x60ff9c,
+        roughness: 0.46,
+        metalness: 0.05,
+        emissive: 0x0a2c17,
+        emissiveIntensity: 0.65
+      }),
+      lace: new THREE.MeshStandardMaterial({
+        color: 0xf8fafc,
+        roughness: 0.85
+      }),
+      logo: new THREE.MeshStandardMaterial({
+        color: 0x111318,
+        roughness: 0.42
+      })
+    };
+
+    function roundedBox(width, height, depth, radius, material) {
+      const shape = new THREE.Shape();
+      const x = -width / 2;
+      const y = -height / 2;
+
+      shape.moveTo(x + radius, y);
+      shape.lineTo(x + width - radius, y);
+      shape.quadraticCurveTo(x + width, y, x + width, y + radius);
+      shape.lineTo(x + width, y + height - radius);
+      shape.quadraticCurveTo(x + width, y + height, x + width - radius, y + height);
+      shape.lineTo(x + radius, y + height);
+      shape.quadraticCurveTo(x, y + height, x, y + height - radius);
+      shape.lineTo(x, y + radius);
+      shape.quadraticCurveTo(x, y, x + radius, y);
+
+      const geometry = new THREE.ExtrudeGeometry(shape, {
+        depth,
+        bevelEnabled: true,
+        bevelSegments: 4,
+        steps: 1,
+        bevelSize: Math.min(radius * 0.46, 0.12),
+        bevelThickness: 0.09
+      });
+
+      geometry.center();
+      geometry.computeVertexNormals();
+
+      const mesh = new THREE.Mesh(geometry, material);
+      mesh.castShadow = true;
+      mesh.receiveShadow = true;
+      return mesh;
+    }
+
+    // Sole
+    const midsole = roundedBox(5.8, 0.62, 2.05, 0.48, materials.sole);
+    midsole.rotation.x = Math.PI / 2;
+    midsole.position.set(0.15, -0.82, 0);
+    shoe.add(midsole);
+
+    const outsole = roundedBox(5.55, 0.22, 1.95, 0.4, materials.outsole);
+    outsole.rotation.x = Math.PI / 2;
+    outsole.position.set(0.18, -1.15, 0);
+    shoe.add(outsole);
+
+    // Main upper body
+    const upper = roundedBox(4.45, 1.55, 1.72, 0.58, materials.upper);
+    upper.rotation.x = Math.PI / 2;
+    upper.position.set(0.38, 0.08, 0);
+    upper.scale.set(1.05, 1, 0.95);
+    shoe.add(upper);
+
+    // Toe box
+    const toe = new THREE.Mesh(
+      new THREE.SphereGeometry(1, 48, 28),
+      materials.upper
+    );
+    toe.scale.set(1.65, 0.67, 0.9);
+    toe.position.set(2.15, -0.03, 0);
+    toe.castShadow = true;
+    toe.receiveShadow = true;
+    shoe.add(toe);
+
+    // Heel block
+    const heel = roundedBox(1.25, 1.86, 1.72, 0.38, materials.upperDark);
+    heel.rotation.x = Math.PI / 2;
+    heel.position.set(-2.03, 0.28, 0);
+    heel.rotation.z = -0.08;
+    shoe.add(heel);
+
+    // Collar
+    const collar = roundedBox(1.85, 0.52, 1.48, 0.28, materials.upperDark);
+    collar.rotation.x = Math.PI / 2;
+    collar.position.set(-0.92, 1.02, 0);
+    collar.rotation.z = -0.08;
+    shoe.add(collar);
+
+    // Tongue
+    const tongue = roundedBox(2.15, 0.28, 1.03, 0.22, materials.upperDark);
+    tongue.rotation.x = Math.PI / 2;
+    tongue.rotation.z = -0.28;
+    tongue.position.set(-0.05, 0.93, 0);
+    shoe.add(tongue);
+
+    // Side accent stripe
+    const stripe = roundedBox(2.7, 0.15, 0.34, 0.08, materials.accent);
+    stripe.position.set(0.32, 0.1, 0.96);
+    stripe.rotation.z = -0.2;
+    shoe.add(stripe);
+
+    // Logo mark
+    const logo = new THREE.Mesh(
+      new THREE.TorusGeometry(0.34, 0.075, 12, 40, Math.PI * 1.45),
+      materials.logo
+    );
+    logo.position.set(0.1, 0.4, 1.0);
+    logo.rotation.z = -0.65;
+    logo.castShadow = true;
+    shoe.add(logo);
+
+    // Laces
+    for (let i = 0; i < 6; i++) {
+      const lace = roundedBox(0.88, 0.055, 0.06, 0.025, materials.lace);
+      lace.position.set(-0.1 + i * 0.2, 0.74 - i * 0.035, 0.89);
+      lace.rotation.z = -0.22;
+      shoe.add(lace);
+    }
+
+    // Sole detail grooves
+    for (let i = 0; i < 7; i++) {
+      const groove = roundedBox(0.32, 0.06, 1.95, 0.03, materials.outsole);
+      groove.rotation.x = Math.PI / 2;
+      groove.position.set(-2.15 + i * 0.72, -0.9, 0);
+      shoe.add(groove);
+    }
+
+    // Ground
+    const ground = new THREE.Mesh(
+      new THREE.CircleGeometry(8, 96),
+      new THREE.MeshStandardMaterial({
+        color: 0x0a0d11,
+        roughness: 1,
+        transparent: true,
+        opacity: 0.78
+      })
+    );
+    ground.rotation.x = -Math.PI / 2;
+    ground.position.y = -1.3;
+    ground.receiveShadow = true;
+    scene.add(ground);
+
+    // Lighting
+    const key = new THREE.DirectionalLight(0xffffff, 4.2);
+    key.position.set(5, 8, 5);
+    key.castShadow = true;
+    key.shadow.mapSize.set(2048, 2048);
+    key.shadow.camera.near = 0.5;
+    key.shadow.camera.far = 30;
+    key.shadow.camera.left = -7;
+    key.shadow.camera.right = 7;
+    key.shadow.camera.top = 7;
+    key.shadow.camera.bottom = -7;
+    scene.add(key);
+
+    const fill = new THREE.DirectionalLight(0x8fb3ff, 1.65);
+    fill.position.set(-5, 2, 4);
+    scene.add(fill);
+
+    const rim = new THREE.PointLight(0x67ffa5, 26, 20, 2);
+    rim.position.set(-4, 4, -4);
+    scene.add(rim);
+
+    scene.add(new THREE.HemisphereLight(0xcfe6ff, 0x10151c, 1.5));
+
+    // Cursor-follow rotation
+    let pointerX = 0;
+    let pointerY = 0;
+    let targetRotX = shoe.rotation.x;
+    let targetRotY = shoe.rotation.y;
+
+    window.addEventListener("pointermove", (event) => {
+      if (event.pointerType === "touch") return;
+
+      pointerX = (event.clientX / window.innerWidth) * 2 - 1;
+      pointerY = (event.clientY / window.innerHeight) * 2 - 1;
+
+      targetRotY = -0.55 + pointerX * 0.45;
+      targetRotX = -0.08 + pointerY * 0.18;
+    });
+
+    renderer.domElement.addEventListener("pointerleave", () => {
+      targetRotX = -0.08;
+      targetRotY = -0.55;
+    });
+
+    const clock = new THREE.Clock();
+
+    function animate() {
+      requestAnimationFrame(animate);
+
+      const t = clock.getElapsedTime();
+
+      if (!controls.state || controls.state === -1) {
+        shoe.rotation.x += (targetRotX - shoe.rotation.x) * 0.055;
+        shoe.rotation.y += (targetRotY - shoe.rotation.y) * 0.055;
+      }
+
+      shoe.position.y = 0.15 + Math.sin(t * 1.4) * 0.055;
+
+      controls.update();
+      renderer.render(scene, camera);
+    }
+
+    animate();
+
+    window.addEventListener("resize", () => {
+      camera.aspect = window.innerWidth / window.innerHeight;
+      camera.updateProjectionMatrix();
+      renderer.setSize(window.innerWidth, window.innerHeight);
+      renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    });
+  </script>
+</body>
+</html>
