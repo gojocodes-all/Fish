@@ -1,5 +1,30 @@
 # Maintenance log
 
+## 2026-09-30 — Run regression tests in CI
+
+### Rationale
+
+The repository has dependency-free regression tests for the Three.js import map, but they previously ran only when invoked manually. Future pull requests could therefore break browser module resolution without a hosted check reporting the regression.
+
+### Files changed
+
+- `.github/workflows/ci.yml` — run the test suite for pull requests and pushes to `main` with read-only permissions, pinned action commits, concurrency cancellation, and a five-minute timeout.
+- `.github/maintenance-log.md` — record this maintenance work.
+
+### Validation
+
+- Ran `npm test` locally on Node.js 24.
+- Parsed the workflow as YAML and checked its permissions, triggers, action pins, timeout, and test command.
+- Ran `git diff --check` and reviewed the complete diff.
+
+### Risk
+
+Low. The change does not modify the demo or its dependencies; it only adds an automated check for the existing test command.
+
+### Rollback
+
+Revert the pull request's squash commit to remove the CI workflow and this log entry.
+
 ## 2026-09-22 — Resolve Three.js addon imports
 
 ### Rationale
