@@ -1,5 +1,31 @@
 # Maintenance log
 
+## 2026-10-07 — Add repository guide
+
+### Rationale
+
+The repository had a working browser demo, regression tests, and CI but no README. A contributor had to inspect the HTML and workflow to discover the entry point, runtime dependency, controls, validation command, and deployment model.
+
+### Files changed
+
+- `README.md` — document the verified purpose, browser and Node.js requirements, local serving, controls, validation, project structure, static deployment, runtime CDN limitation, and contribution workflow.
+- `.github/maintenance-log.md` — record this documentation work.
+
+### Validation
+
+- Ran `npm test` on Node.js 24.
+- Served the repository locally and confirmed the documented page returns successfully over HTTP.
+- Cross-checked every command, path, control, dependency version, and deployment statement against the HTML, package manifest, tests, workflow, and repository tree.
+- Ran `git diff --check` and reviewed the complete diff.
+
+### Risk
+
+Low. This is documentation-only and does not change the rendered demo, dependencies, tests, or deployment configuration.
+
+### Rollback
+
+Revert the pull request's squash commit to remove the README and this log entry.
+
 ## 2026-09-30 — Run regression tests in CI
 
 ### Rationale
