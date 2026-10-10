@@ -29,6 +29,10 @@ No package installation or build step is required. Opening the file directly wit
 
 Panning is disabled so the product remains centered.
 
+The demo respects the operating system's reduced-motion preference. In that
+mode, automatic floating and cursor-follow motion stop while direct drag and
+zoom controls remain available. Rendering also pauses while the page is hidden.
+
 ## Validation
 
 Run the dependency-free Node.js test suite:
@@ -37,14 +41,16 @@ Run the dependency-free Node.js test suite:
 npm test
 ```
 
-The tests verify that the page includes an import map, that core Three.js and its addons use the same pinned release, and that `OrbitControls` loads through the mapped addon path. GitHub Actions runs the same command for pull requests and pushes to `main`.
+The tests verify that the page includes an import map, that core Three.js and its addons use the same pinned release, that `OrbitControls` loads through the mapped addon path, and that the render loop starts, stops, and resumes without large time jumps. GitHub Actions runs the same command for pull requests and pushes to `main`.
 
 ## Project structure
 
 | Path | Purpose |
 | --- | --- |
 | `interactive-3d-shoe-4.html` | Complete demo markup, styles, scene construction, lighting, controls, and animation loop |
+| `assets/js/render-loop.js` | Testable animation-frame lifecycle with pause and resume safeguards |
 | `test/import-map.test.js` | Regression coverage for browser module resolution |
+| `test/render-loop.test.js` | Render-loop scheduling, cancellation, and timing regression coverage |
 | `package.json` | Node.js requirement and test command; the project has no npm dependencies |
 | `.github/workflows/ci.yml` | Read-only hosted test workflow |
 | `.github/maintenance-log.md` | Maintenance decisions, validation, risk, and rollback notes |

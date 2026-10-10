@@ -1,5 +1,35 @@
 # Maintenance log
 
+## 2026-10-10 — Respect reduced motion and render only while visible
+
+### Rationale
+
+The WebGL scene previously ran a continuous animation loop whenever the page was open and always applied floating and cursor-follow motion. It did not honor the visitor's reduced-motion preference, and its animation lifecycle had no explicit pause or safe-resume behavior for hidden pages.
+
+### Files changed
+
+- `assets/js/render-loop.js` — add a small, dependency-free animation-frame lifecycle that prevents duplicate loops, cancels queued frames, and caps elapsed time after interruptions.
+- `interactive-3d-shoe-4.html` — pause rendering while hidden, switch to on-demand rendering for reduced motion, keep direct orbit/zoom controls available, and resume without a large animation jump.
+- `test/render-loop.test.js` — cover scheduling, cancellation, delta capping, restart behavior, and a run condition that changes after scheduling.
+- `test/import-map.test.js` — verify the page wires the lifecycle to reduced-motion and visibility state.
+- `README.md` — document the motion behavior, render lifecycle, and new module and tests.
+- `.github/maintenance-log.md` — record this change.
+
+### Validation
+
+- Ran `npm test` on Node.js 24.
+- Syntax-checked `assets/js/render-loop.js` and the page's inline ES module with Node.js.
+- Served the repository locally and verified the page and local module return successfully over HTTP.
+- Ran `git diff --check` and reviewed the complete diff for accessibility, performance, security, compatibility, and repository conventions.
+
+### Risk
+
+Low. The Three.js scene, geometry, dependencies, and direct orbit/zoom controls are unchanged. The new behavior only governs when automatic frames and motion run.
+
+### Rollback
+
+Revert the pull request's squash commit to restore the previous always-running animation loop.
+
 ## 2026-10-07 — Add repository guide
 
 ### Rationale
