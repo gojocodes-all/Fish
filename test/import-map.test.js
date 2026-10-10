@@ -29,3 +29,17 @@ test('loads OrbitControls through the mapped addon path', () => {
     /import \{ OrbitControls \} from ["']three\/addons\/controls\/OrbitControls\.js["']/,
   );
 });
+
+test('wires rendering to reduced-motion and page-visibility state', () => {
+  assert.match(
+    html,
+    /import \{ createRenderLoop \} from ["']\.\/assets\/js\/render-loop\.js["']/,
+  );
+  assert.match(html, /matchMedia\(["']\(prefers-reduced-motion: reduce\)["']\)/);
+  assert.match(html, /document\.addEventListener\(["']visibilitychange["']/);
+  assert.match(
+    html,
+    /shouldRun:\s*\(\) => !document\.hidden && !reducedMotion\.matches/,
+  );
+  assert.match(html, /controls\.enableDamping = !reducedMotion\.matches/);
+});

@@ -132,6 +132,7 @@
   <script type="module">
     import * as THREE from "three";
     import { OrbitControls } from "three/addons/controls/OrbitControls.js";
+    import { createRenderLoop } from "./assets/js/render-loop.js";
 
     const app = document.querySelector("#app");
 
@@ -359,6 +360,8 @@
 
     scene.add(new THREE.HemisphereLight(0xcfe6ff, 0x10151c, 1.5));
 
+    const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
+
     // Cursor-follow rotation
     let pointerX = 0;
     let pointerY = 0;
@@ -366,7 +369,7 @@
     let targetRotY = shoe.rotation.y;
 
     window.addEventListener("pointermove", (event) => {
-      if (event.pointerType === "touch") return;
+      if (event.pointerType === "touch" || reducedMotion.matches) return;
 
       pointerX = (event.clientX / window.innerWidth) * 2 - 1;
       pointerY = (event.clientY / window.innerHeight) * 2 - 1;
@@ -380,31 +383,71 @@
       targetRotY = -0.55;
     });
 
-    const clock = new THREE.Clock();
+    let elapsedSeconds = 0;
 
-    function animate() {
-      requestAnimationFrame(animate);
-
-      const t = clock.getElapsedTime();
-
-      if (!controls.state || controls.state === -1) {
-        shoe.rotation.x += (targetRotX - shoe.rotation.x) * 0.055;
-        shoe.rotation.y += (targetRotY - shoe.rotation.y) * 0.055;
-      }
-
-      shoe.position.y = 0.15 + Math.sin(t * 1.4) * 0.055;
-
-      controls.update();
+    function renderScene() {
       renderer.render(scene, camera);
     }
 
-    animate();
+    const renderLoop = createRenderLoop({
+      cancelFrame: window.cancelAnimationFrame.bind(window),
+      requestFrame: window.requestAnimationFrame.bind(window),
+      shouldRun: () => !document.hidden && !reducedMotion.matches,
+      onFrame: ({ deltaSeconds }) => {
+        elapsedSeconds += deltaSeconds;
+
+        if (!controls.state || controls.state === -1) {
+          shoe.rotation.x += (targetRotX - shoe.rotation.x) * 0.055;
+          shoe.rotation.y += (targetRotY - shoe.rotation.y) * 0.055;
+        }
+
+        shoe.position.y = 0.15 + Math.sin(elapsedSeconds * 1.4) * 0.055;
+
+        controls.update();
+        renderScene();
+      }
+    });
+
+    function applyMotionPreference() {
+      controls.enableDamping = !reducedMotion.matches;
+
+      if (!reducedMotion.matches) {
+        renderLoop.start();
+        return;
+      }
+
+      renderLoop.stop();
+      targetRotX = -0.08;
+      targetRotY = -0.55;
+      shoe.rotation.x = targetRotX;
+      shoe.rotation.y = targetRotY;
+      shoe.position.y = 0.15;
+      controls.update();
+      if (!document.hidden) renderScene();
+    }
+
+    controls.addEventListener("change", () => {
+      if (reducedMotion.matches && !document.hidden) renderScene();
+    });
+
+    reducedMotion.addEventListener("change", applyMotionPreference);
+    document.addEventListener("visibilitychange", () => {
+      if (document.hidden) {
+        renderLoop.stop();
+      } else {
+        applyMotionPreference();
+      }
+    });
+
+    applyMotionPreference();
 
     window.addEventListener("resize", () => {
       camera.aspect = window.innerWidth / window.innerHeight;
       camera.updateProjectionMatrix();
       renderer.setSize(window.innerWidth, window.innerHeight);
       renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+
+      if (reducedMotion.matches && !document.hidden) renderScene();
     });
   </script>
 </body>
