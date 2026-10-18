@@ -78,6 +78,53 @@
       font-size: 0.94rem;
     }
 
+    .viewer-controls {
+      position: absolute;
+      left: 24px;
+      bottom: 24px;
+      z-index: 3;
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, auto));
+      gap: 8px;
+      max-width: 390px;
+    }
+
+    .viewer-controls button {
+      min-height: 44px;
+      padding: 10px 14px;
+      border: 1px solid rgba(255,255,255,0.16);
+      border-radius: 999px;
+      background: rgba(7,9,13,0.78);
+      color: var(--text);
+      font: inherit;
+      font-size: 0.82rem;
+      font-weight: 700;
+      cursor: pointer;
+      backdrop-filter: blur(10px);
+    }
+
+    .viewer-controls button:hover {
+      border-color: rgba(140,255,177,0.55);
+      background: rgba(24,32,29,0.92);
+    }
+
+    .viewer-controls button:focus-visible {
+      outline: 3px solid var(--accent);
+      outline-offset: 3px;
+    }
+
+    .visually-hidden {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      margin: -1px;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+      white-space: nowrap;
+      border: 0;
+    }
+
     .badge {
       position: absolute;
       right: 24px;
@@ -102,9 +149,21 @@
         padding: 14px 16px;
       }
 
-      .badge {
+      .viewer-controls {
+        left: 14px;
         right: 14px;
         bottom: 14px;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        max-width: 320px;
+      }
+
+      .viewer-controls button[data-view-action="reset"] {
+        grid-column: 1 / -1;
+      }
+
+      .badge {
+        right: 14px;
+        bottom: 170px;
       }
     }
   </style>
@@ -114,8 +173,17 @@
     <div class="copy">
       <div class="eyebrow">Interactive product demo</div>
       <h1>GOJO RUNNER</h1>
-      <p>Move your cursor or drag to rotate. Scroll to zoom. On mobile, drag with one finger.</p>
+      <p>Drag to rotate, scroll or pinch to zoom, or use the viewer controls.</p>
     </div>
+
+    <div class="viewer-controls" aria-label="3D sneaker viewer controls">
+      <button type="button" data-view-action="rotate-left">Rotate left</button>
+      <button type="button" data-view-action="rotate-right">Rotate right</button>
+      <button type="button" data-view-action="zoom-in">Zoom in</button>
+      <button type="button" data-view-action="zoom-out">Zoom out</button>
+      <button type="button" data-view-action="reset">Reset view</button>
+    </div>
+    <p id="viewer-status" class="visually-hidden" aria-live="polite"></p>
 
     <div class="badge">Procedural Three.js sneaker</div>
   </div>
@@ -135,6 +203,8 @@
     import { createRenderLoop } from "./assets/js/render-loop.js";
 
     const app = document.querySelector("#app");
+    const viewControls = document.querySelector(".viewer-controls");
+    const viewerStatus = document.querySelector("#viewer-status");
 
     const scene = new THREE.Scene();
     scene.fog = new THREE.Fog(0x07090d, 8, 18);
@@ -157,6 +227,11 @@
     renderer.outputColorSpace = THREE.SRGBColorSpace;
     renderer.shadowMap.enabled = true;
     renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+    renderer.domElement.setAttribute("role", "img");
+    renderer.domElement.setAttribute(
+      "aria-label",
+      "Interactive 3D sneaker. Use the viewer controls to rotate and zoom."
+    );
     app.appendChild(renderer.domElement);
 
     const controls = new OrbitControls(camera, renderer.domElement);
@@ -166,6 +241,9 @@
     controls.minDistance = 6;
     controls.maxDistance = 13;
     controls.target.set(0, 0.35, 0);
+
+    const initialCameraPosition = camera.position.clone();
+    const initialControlTarget = controls.target.clone();
 
     const shoe = new THREE.Group();
     shoe.rotation.set(-0.08, -0.55, 0.03);
@@ -381,6 +459,63 @@
     renderer.domElement.addEventListener("pointerleave", () => {
       targetRotX = -0.08;
       targetRotY = -0.55;
+    });
+
+    function renderControlChange(message) {
+      controls.update();
+      if (reducedMotion.matches && !document.hidden) renderScene();
+      viewerStatus.textContent = message;
+    }
+
+    function rotateView(delta, message) {
+      targetRotY = THREE.MathUtils.clamp(targetRotY + delta, -Math.PI, Math.PI);
+      if (reducedMotion.matches) shoe.rotation.y = targetRotY;
+      renderControlChange(message);
+    }
+
+    function zoomView(delta, message) {
+      const offset = camera.position.clone().sub(controls.target);
+      const nextDistance = THREE.MathUtils.clamp(
+        offset.length() + delta,
+        controls.minDistance,
+        controls.maxDistance
+      );
+      camera.position.copy(controls.target).add(offset.setLength(nextDistance));
+      renderControlChange(message);
+    }
+
+    function resetView() {
+      targetRotX = -0.08;
+      targetRotY = -0.55;
+      shoe.rotation.x = targetRotX;
+      shoe.rotation.y = targetRotY;
+      shoe.position.y = 0.15;
+      camera.position.copy(initialCameraPosition);
+      controls.target.copy(initialControlTarget);
+      renderControlChange("View reset.");
+    }
+
+    viewControls.addEventListener("click", (event) => {
+      const button = event.target.closest("[data-view-action]");
+      if (!button || !viewControls.contains(button)) return;
+
+      switch (button.dataset.viewAction) {
+        case "rotate-left":
+          rotateView(-Math.PI / 12, "Sneaker rotated left.");
+          break;
+        case "rotate-right":
+          rotateView(Math.PI / 12, "Sneaker rotated right.");
+          break;
+        case "zoom-in":
+          zoomView(-1, "View zoomed in.");
+          break;
+        case "zoom-out":
+          zoomView(1, "View zoomed out.");
+          break;
+        case "reset":
+          resetView();
+          break;
+      }
     });
 
     let elapsedSeconds = 0;
