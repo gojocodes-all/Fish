@@ -26,8 +26,9 @@ No package installation or build step is required. Opening the file directly wit
 - Drag to orbit the camera around the model.
 - Scroll to zoom within the configured distance limits.
 - On a touch screen, drag with one finger to orbit.
+- Use the on-screen Rotate, Zoom, and Reset buttons with a keyboard, switch device, mouse, or touch. Screen readers receive a short status update after each action.
 
-Panning is disabled so the product remains centered.
+Panning is disabled so the product remains centered. The viewer controls keep a 44-pixel minimum target size and collapse to a two-column layout on narrow screens.
 
 The demo respects the operating system's reduced-motion preference. In that
 mode, automatic floating and cursor-follow motion stop while direct drag and
@@ -41,7 +42,7 @@ Run the dependency-free Node.js test suite:
 npm test
 ```
 
-The tests verify that the page includes an import map, that core Three.js and its addons use the same pinned release, that `OrbitControls` loads through the mapped addon path, and that the render loop starts, stops, and resumes without large time jumps. GitHub Actions runs the same command for pull requests and pushes to `main`.
+The tests verify that the page includes an import map, that core Three.js and its addons use the same pinned release, that `OrbitControls` loads through the mapped addon path, that keyboard-operable viewer controls and feedback remain present, and that the render loop starts, stops, and resumes without large time jumps. GitHub Actions runs the same command for pull requests and pushes to `main`.
 
 ## Project structure
 

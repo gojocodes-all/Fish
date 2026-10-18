@@ -1,5 +1,33 @@
 # Maintenance log
 
+## 2026-10-18 — Add keyboard-operable 3D viewer controls
+
+### Rationale
+
+The sneaker could only be rotated or zoomed with pointer, touch, or wheel input. Keyboard and switch-device users could read the page but could not operate its primary interactive experience.
+
+### Files changed
+
+- `interactive-3d-shoe-4.html` — add responsive Rotate, Zoom, and Reset buttons, a labelled canvas, visible focus treatment, 44-pixel targets, and polite screen-reader feedback while preserving drag, pointer-follow, scroll, pinch, and reduced-motion behavior.
+- `test/import-map.test.js` — verify every viewer action remains a native button and that the labelled control group, live feedback, canvas semantics, click wiring, and zoom bounds remain present.
+- `README.md` — document keyboard and switch-device operation and the responsive control layout.
+- `.github/maintenance-log.md` — record this change.
+
+### Validation
+
+- Run `npm test`.
+- Syntax-check the page's inline ES module with Node.js.
+- Serve the repository locally and verify the demo and local render-loop module load over HTTP.
+- Review the complete diff for accessibility, mobile layout, reduced motion, security, compatibility, and repository conventions.
+
+### Risk
+
+Low. Scene geometry, Three.js dependencies, pointer/touch controls, animation lifecycle, and zoom limits are unchanged. The added buttons call the same model, camera, and OrbitControls state already used by the demo.
+
+### Rollback
+
+Revert this pull request's squash commit to remove the viewer-control panel and its documentation and regression coverage.
+
 ## 2026-10-10 — Respect reduced motion and render only while visible
 
 ### Rationale
