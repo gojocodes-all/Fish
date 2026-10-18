@@ -43,3 +43,34 @@ test('wires rendering to reduced-motion and page-visibility state', () => {
   );
   assert.match(html, /controls\.enableDamping = !reducedMotion\.matches/);
 });
+
+
+test('provides keyboard-operable viewer controls and feedback', () => {
+  for (const action of [
+    'rotate-left',
+    'rotate-right',
+    'zoom-in',
+    'zoom-out',
+    'reset',
+  ]) {
+    assert.match(
+      html,
+      new RegExp(
+        `<button[^>]+type=["']button["'][^>]+data-view-action=["']${action}["']`,
+      ),
+    );
+  }
+
+  assert.match(
+    html,
+    /class=["']viewer-controls["'][^>]+aria-label=["']3D sneaker viewer controls["']/,
+  );
+  assert.match(
+    html,
+    /id=["']viewer-status["'][^>]+aria-live=["']polite["']/,
+  );
+  assert.match(html, /renderer\.domElement\.setAttribute\(["']role["'], ["']img["']\)/);
+  assert.match(html, /viewControls\.addEventListener\(["']click["']/);
+  assert.match(html, /controls\.minDistance/);
+  assert.match(html, /controls\.maxDistance/);
+});
