@@ -26,7 +26,7 @@ No package installation or build step is required. Opening the file directly wit
 - Drag to orbit the camera around the model.
 - Scroll to zoom within the configured distance limits.
 - On a touch screen, drag with one finger to orbit.
-- Use the on-screen Rotate, Zoom, and Reset buttons with a keyboard, switch device, mouse, or touch. Screen readers receive a short status update after each action.
+- Use the on-screen Rotate, Zoom, and Reset buttons with a keyboard, switch device, mouse, or touch. Screen readers receive a short status update after each action, and each Zoom button becomes unavailable at its corresponding distance limit.
 
 Panning is disabled so the product remains centered. The viewer controls keep a 44-pixel minimum target size and collapse to a two-column layout on narrow screens.
 
@@ -42,7 +42,7 @@ Run the dependency-free Node.js test suite:
 npm test
 ```
 
-The tests verify that the page includes an import map, that core Three.js and its addons use the same pinned release, that `OrbitControls` loads through the mapped addon path, that keyboard-operable viewer controls and feedback remain present, and that the render loop starts, stops, and resumes without large time jumps. GitHub Actions runs the same command for pull requests and pushes to `main`.
+The tests verify that the page includes an import map, that core Three.js and its addons use the same pinned release, that `OrbitControls` loads through the mapped addon path, that keyboard-operable viewer controls and feedback remain present, that zoom availability follows the configured distance limits, and that the render loop starts, stops, and resumes without large time jumps. GitHub Actions runs the same command for pull requests and pushes to `main`.
 
 ## Project structure
 
@@ -50,8 +50,10 @@ The tests verify that the page includes an import map, that core Three.js and it
 | --- | --- |
 | `interactive-3d-shoe-4.html` | Complete demo markup, styles, scene construction, lighting, controls, and animation loop |
 | `assets/js/render-loop.js` | Testable animation-frame lifecycle with pause and resume safeguards |
+| `assets/js/view-state.js` | Testable zoom-control availability at the camera distance limits |
 | `test/import-map.test.js` | Regression coverage for browser module resolution |
 | `test/render-loop.test.js` | Render-loop scheduling, cancellation, and timing regression coverage |
+| `test/view-state.test.js` | Zoom-boundary state regression coverage |
 | `package.json` | Node.js requirement and test command; the project has no npm dependencies |
 | `.github/workflows/ci.yml` | Read-only hosted test workflow |
 | `.github/maintenance-log.md` | Maintenance decisions, validation, risk, and rollback notes |
