@@ -103,9 +103,16 @@
       backdrop-filter: blur(10px);
     }
 
-    .viewer-controls button:hover {
+    .viewer-controls button:not(:disabled):hover {
       border-color: rgba(140,255,177,0.55);
       background: rgba(24,32,29,0.92);
+    }
+
+    .viewer-controls button:disabled {
+      border-color: rgba(255,255,255,0.08);
+      background: rgba(7,9,13,0.52);
+      color: rgba(245,247,250,0.48);
+      cursor: not-allowed;
     }
 
     .viewer-controls button:focus-visible {
@@ -201,10 +208,13 @@
     import * as THREE from "three";
     import { OrbitControls } from "three/addons/controls/OrbitControls.js";
     import { createRenderLoop } from "./assets/js/render-loop.js";
+    import { getZoomAvailability } from "./assets/js/view-state.js";
 
     const app = document.querySelector("#app");
     const viewControls = document.querySelector(".viewer-controls");
     const viewerStatus = document.querySelector("#viewer-status");
+    const zoomInButton = viewControls.querySelector('[data-view-action="zoom-in"]');
+    const zoomOutButton = viewControls.querySelector('[data-view-action="zoom-out"]');
 
     const scene = new THREE.Scene();
     scene.fog = new THREE.Fog(0x07090d, 8, 18);
@@ -461,8 +471,20 @@
       targetRotY = -0.55;
     });
 
+    function updateZoomButtonState() {
+      const { canZoomIn, canZoomOut } = getZoomAvailability(
+        camera.position.distanceTo(controls.target),
+        controls.minDistance,
+        controls.maxDistance
+      );
+
+      zoomInButton.disabled = !canZoomIn;
+      zoomOutButton.disabled = !canZoomOut;
+    }
+
     function renderControlChange(message) {
       controls.update();
+      updateZoomButtonState();
       if (reducedMotion.matches && !document.hidden) renderScene();
       viewerStatus.textContent = message;
     }
@@ -545,6 +567,7 @@
 
     function applyMotionPreference() {
       controls.enableDamping = !reducedMotion.matches;
+      updateZoomButtonState();
 
       if (!reducedMotion.matches) {
         renderLoop.start();
@@ -562,6 +585,7 @@
     }
 
     controls.addEventListener("change", () => {
+      updateZoomButtonState();
       if (reducedMotion.matches && !document.hidden) renderScene();
     });
 

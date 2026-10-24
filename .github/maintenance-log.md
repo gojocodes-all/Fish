@@ -1,5 +1,35 @@
 # Maintenance log
 
+## 2026-10-24 — Disable zoom controls at camera limits
+
+### Rationale
+
+The Zoom In and Zoom Out buttons remained enabled after the camera reached its configured minimum or maximum distance. Repeated activation then produced no visual change while still announcing a successful zoom, creating misleading feedback for keyboard, switch-device, mouse, and touch users.
+
+### Files changed
+
+- `assets/js/view-state.js` — derive zoom-button availability from the current camera distance and configured OrbitControls limits.
+- `interactive-3d-shoe-4.html` — keep native disabled states synchronized after button, drag, wheel, pinch, reset, reduced-motion, and visibility-driven updates, with a distinct disabled appearance.
+- `test/view-state.test.js` — cover minimum, intermediate, and maximum camera distances.
+- `test/import-map.test.js` — verify the page imports and applies the zoom availability state.
+- `README.md` — document the boundary behavior and new module and test.
+- `.github/maintenance-log.md` — record this change.
+
+### Validation
+
+- Ran all 10 tests with `npm test` on Node.js 24.
+- Syntax-checked the local JavaScript modules and the page's inline ES module with Node.js.
+- Served the repository locally and verified the page and both local modules return HTTP 200.
+- Ran `git diff --check` and reviewed the complete diff for accessibility, mobile behavior, reduced motion, security, compatibility, and repository conventions.
+
+### Risk
+
+Low. Camera positions, zoom limits, scene geometry, dependencies, and pointer/touch behavior are unchanged. The change only exposes the existing limits through native button state and styling.
+
+### Rollback
+
+Revert this pull request's squash commit to restore the previous always-enabled zoom buttons and remove their state helper and tests.
+
 ## 2026-10-18 — Add keyboard-operable 3D viewer controls
 
 ### Rationale

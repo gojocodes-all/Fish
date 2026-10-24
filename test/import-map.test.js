@@ -73,4 +73,10 @@ test('provides keyboard-operable viewer controls and feedback', () => {
   assert.match(html, /viewControls\.addEventListener\(["']click["']/);
   assert.match(html, /controls\.minDistance/);
   assert.match(html, /controls\.maxDistance/);
+  assert.match(
+    html,
+    /import \{ getZoomAvailability \} from ["']\.\/assets\/js\/view-state\.js["']/,
+  );
+  assert.match(html, /zoomInButton\.disabled = !canZoomIn/);
+  assert.match(html, /zoomOutButton\.disabled = !canZoomOut/);
 });
