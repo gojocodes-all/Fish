@@ -44,6 +44,19 @@ test('wires rendering to reduced-motion and page-visibility state', () => {
   assert.match(html, /controls\.enableDamping = !reducedMotion\.matches/);
 });
 
+test('pauses automatic rotation during direct orbit interactions', () => {
+  assert.doesNotMatch(html, /controls\.state/);
+  assert.match(html, /let isDirectManipulationActive = false/);
+  assert.match(
+    html,
+    /controls\.addEventListener\(["']start["'],[\s\S]*?isDirectManipulationActive = true/,
+  );
+  assert.match(
+    html,
+    /controls\.addEventListener\(["']end["'],[\s\S]*?isDirectManipulationActive = false/,
+  );
+  assert.match(html, /if \(!isDirectManipulationActive\)/);
+});
 
 test('provides keyboard-operable viewer controls and feedback', () => {
   for (const action of [

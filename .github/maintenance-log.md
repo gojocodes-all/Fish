@@ -1,5 +1,33 @@
 # Maintenance log
 
+## 2026-10-30 — Pause automatic rotation during direct orbiting
+
+### Rationale
+
+The render loop tried to detect active OrbitControls input through an undocumented `controls.state` property. That property is absent from the public control instance, so the falsy-value check always allowed cursor-follow rotation to continue while a visitor dragged to orbit the camera. The two interactions could therefore compete even though the loop clearly intended to pause automatic model rotation during direct manipulation.
+
+### Files changed
+
+- `interactive-3d-shoe-4.html` — track OrbitControls' supported `start` and `end` events and suspend cursor-follow interpolation while an orbit interaction is active.
+- `test/import-map.test.js` — prevent regression to the unavailable state property and verify the public interaction lifecycle controls automatic rotation.
+- `README.md` — document how cursor-follow and direct orbit input are coordinated.
+- `.github/maintenance-log.md` — record this change.
+
+### Validation
+
+- Ran the complete dependency-free test suite with `npm test`.
+- Syntax-checked both local JavaScript modules and the page's inline ES module with Node.js.
+- Served the repository locally and confirmed the page and both local modules return HTTP 200.
+- Ran `git diff --check` and reviewed the complete diff for correctness, security, accessibility, mobile behavior, reduced motion, backward compatibility, and repository conventions.
+
+### Risk
+
+Low. Camera controls, scene geometry, dependencies, zoom behavior, and reduced-motion behavior are unchanged. The change only pauses existing cursor-follow interpolation between OrbitControls' documented interaction lifecycle events.
+
+### Rollback
+
+Revert this pull request's squash commit to restore the previous state check and simultaneous cursor-follow interpolation during direct orbiting.
+
 ## 2026-10-24 — Disable zoom controls at camera limits
 
 ### Rationale

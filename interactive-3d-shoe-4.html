@@ -252,6 +252,14 @@
     controls.maxDistance = 13;
     controls.target.set(0, 0.35, 0);
 
+    let isDirectManipulationActive = false;
+    controls.addEventListener("start", () => {
+      isDirectManipulationActive = true;
+    });
+    controls.addEventListener("end", () => {
+      isDirectManipulationActive = false;
+    });
+
     const initialCameraPosition = camera.position.clone();
     const initialControlTarget = controls.target.clone();
 
@@ -553,7 +561,7 @@
       onFrame: ({ deltaSeconds }) => {
         elapsedSeconds += deltaSeconds;
 
-        if (!controls.state || controls.state === -1) {
+        if (!isDirectManipulationActive) {
           shoe.rotation.x += (targetRotX - shoe.rotation.x) * 0.055;
           shoe.rotation.y += (targetRotY - shoe.rotation.y) * 0.055;
         }

@@ -23,7 +23,7 @@ No package installation or build step is required. Opening the file directly wit
 ## Controls
 
 - Move the mouse or trackpad pointer to gently turn the sneaker.
-- Drag to orbit the camera around the model.
+- Drag to orbit the camera around the model. Cursor-follow rotation pauses while the direct orbit interaction is active so the two inputs do not compete.
 - Scroll to zoom within the configured distance limits.
 - On a touch screen, drag with one finger to orbit.
 - Use the on-screen Rotate, Zoom, and Reset buttons with a keyboard, switch device, mouse, or touch. Screen readers receive a short status update after each action, and each Zoom button becomes unavailable at its corresponding distance limit.
