@@ -1,5 +1,30 @@
 # Maintenance log
 
+## 2026-11-08 — Validate the inline browser module
+
+### Rationale
+
+The demo's primary browser entry point is a 413-line inline ES module. The existing tests parsed the import map and matched important integration patterns, but they did not parse the complete module. A syntax regression outside those matched regions could therefore pass local and hosted validation while preventing the viewer from initializing in a browser.
+
+### Files changed
+
+- `test/html-module-syntax.test.js` — extract every inline module from the HTML entry point and syntax-check it as ES module input with the active Node.js runtime.
+- `README.md` — document the full-module syntax gate and its test file.
+- `.github/maintenance-log.md` — record this validation improvement.
+
+### Validation
+
+- Ran the complete dependency-free test suite with `npm test` on Node.js 20 and Node.js 24.
+- Ran `git diff --check` and independently reviewed the complete diff for correctness, security, accessibility impact, backward compatibility, and repository scope.
+
+### Risk
+
+Low. This change adds validation and documentation only. The HTML application, scene, controls, runtime dependencies, deployment behavior, and public interface are unchanged.
+
+### Rollback
+
+Revert this pull request's squash commit to remove the inline-module syntax gate and its documentation; no runtime or data rollback is required.
+
 ## 2026-10-30 — Pause automatic rotation during direct orbiting
 
 ### Rationale

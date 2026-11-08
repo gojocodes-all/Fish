@@ -42,7 +42,7 @@ Run the dependency-free Node.js test suite:
 npm test
 ```
 
-The tests verify that the page includes an import map, that core Three.js and its addons use the same pinned release, that `OrbitControls` loads through the mapped addon path, that keyboard-operable viewer controls and feedback remain present, that zoom availability follows the configured distance limits, and that the render loop starts, stops, and resumes without large time jumps. GitHub Actions runs the same command for pull requests and pushes to `main`.
+The tests syntax-check every inline browser module, verify that the page includes an import map, confirm that core Three.js and its addons use the same pinned release, check that `OrbitControls` loads through the mapped addon path, keep the keyboard-operable viewer controls and feedback present, validate zoom availability at the configured distance limits, and exercise the render loop's start, stop, and safe-resume behavior. GitHub Actions runs the same command for pull requests and pushes to `main`.
 
 ## Project structure
 
@@ -51,6 +51,7 @@ The tests verify that the page includes an import map, that core Three.js and it
 | `interactive-3d-shoe-4.html` | Complete demo markup, styles, scene construction, lighting, controls, and animation loop |
 | `assets/js/render-loop.js` | Testable animation-frame lifecycle with pause and resume safeguards |
 | `assets/js/view-state.js` | Testable zoom-control availability at the camera distance limits |
+| `test/html-module-syntax.test.js` | Syntax validation for the complete inline browser entry module |
 | `test/import-map.test.js` | Regression coverage for browser module resolution |
 | `test/render-loop.test.js` | Render-loop scheduling, cancellation, and timing regression coverage |
 | `test/view-state.test.js` | Zoom-boundary state regression coverage |
