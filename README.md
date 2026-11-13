@@ -33,6 +33,8 @@ Panning is disabled so the product remains centered. The viewer controls keep a 
 The demo respects the operating system's reduced-motion preference. In that
 mode, automatic floating and cursor-follow motion stop while direct drag and
 zoom controls remain available. Rendering also pauses while the page is hidden.
+If the browser cannot initialize WebGL, the inactive viewer controls are hidden
+and the page explains how to retry instead of leaving a broken interactive UI.
 
 ## Validation
 
@@ -42,7 +44,7 @@ Run the dependency-free Node.js test suite:
 npm test
 ```
 
-The tests syntax-check every inline browser module, verify that the page includes an import map, confirm that core Three.js and its addons use the same pinned release, check that `OrbitControls` loads through the mapped addon path, keep the keyboard-operable viewer controls and feedback present, validate zoom availability at the configured distance limits, and exercise the render loop's start, stop, and safe-resume behavior. GitHub Actions runs the same command for pull requests and pushes to `main`.
+The tests syntax-check every inline browser module, verify that the page includes an import map, confirm that core Three.js and its addons use the same pinned release, check that `OrbitControls` loads through the mapped addon path, keep the keyboard-operable viewer controls and WebGL fallback present, validate zoom availability at the configured distance limits, and exercise the render loop's start, stop, and safe-resume behavior. GitHub Actions runs the same command for pull requests and pushes to `main`.
 
 ## Project structure
 
@@ -50,10 +52,12 @@ The tests syntax-check every inline browser module, verify that the page include
 | --- | --- |
 | `interactive-3d-shoe-4.html` | Complete demo markup, styles, scene construction, lighting, controls, and animation loop |
 | `assets/js/render-loop.js` | Testable animation-frame lifecycle with pause and resume safeguards |
+| `assets/js/renderer-initialization.js` | Testable WebGL renderer failure boundary |
 | `assets/js/view-state.js` | Testable zoom-control availability at the camera distance limits |
 | `test/html-module-syntax.test.js` | Syntax validation for the complete inline browser entry module |
 | `test/import-map.test.js` | Regression coverage for browser module resolution |
 | `test/render-loop.test.js` | Render-loop scheduling, cancellation, and timing regression coverage |
+| `test/renderer-initialization.test.js` | WebGL renderer success and failure regression coverage |
 | `test/view-state.test.js` | Zoom-boundary state regression coverage |
 | `package.json` | Node.js requirement and test command; the project has no npm dependencies |
 | `.github/workflows/ci.yml` | Read-only hosted test workflow |

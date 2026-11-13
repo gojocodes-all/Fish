@@ -120,6 +120,31 @@
       outline-offset: 3px;
     }
 
+    .viewer-controls[hidden],
+    .viewer-fallback[hidden] {
+      display: none;
+    }
+
+    .viewer-fallback {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      z-index: 4;
+      width: min(420px, calc(100% - 32px));
+      padding: 22px;
+      border: 1px solid rgba(255,255,255,0.16);
+      border-radius: 18px;
+      background: rgba(7,9,13,0.92);
+      box-shadow: 0 20px 60px rgba(0,0,0,0.35);
+      text-align: center;
+      transform: translate(-50%, -50%);
+    }
+
+    .viewer-fallback h2 {
+      margin: 0 0 8px;
+      font-size: 1.25rem;
+    }
+
     .visually-hidden {
       position: absolute;
       width: 1px;
@@ -192,6 +217,20 @@
     </div>
     <p id="viewer-status" class="visually-hidden" aria-live="polite"></p>
 
+    <section
+      id="viewer-fallback"
+      class="viewer-fallback"
+      role="status"
+      aria-labelledby="viewer-fallback-title"
+      hidden
+    >
+      <h2 id="viewer-fallback-title">3D viewer unavailable</h2>
+      <p>
+        This browser could not start WebGL. Try enabling hardware acceleration
+        or opening the page in another modern browser.
+      </p>
+    </section>
+
     <div class="badge">Procedural Three.js sneaker</div>
   </div>
 
@@ -208,11 +247,13 @@
     import * as THREE from "three";
     import { OrbitControls } from "three/addons/controls/OrbitControls.js";
     import { createRenderLoop } from "./assets/js/render-loop.js";
+    import { createRendererSafely } from "./assets/js/renderer-initialization.js";
     import { getZoomAvailability } from "./assets/js/view-state.js";
 
     const app = document.querySelector("#app");
     const viewControls = document.querySelector(".viewer-controls");
     const viewerStatus = document.querySelector("#viewer-status");
+    const viewerFallback = document.querySelector("#viewer-fallback");
     const zoomInButton = viewControls.querySelector('[data-view-action="zoom-in"]');
     const zoomOutButton = viewControls.querySelector('[data-view-action="zoom-out"]');
 
@@ -227,10 +268,18 @@
     );
     camera.position.set(7.4, 3.6, 8.4);
 
-    const renderer = new THREE.WebGLRenderer({
-      antialias: true,
-      alpha: true
-    });
+    const { renderer, error: rendererError } = createRendererSafely(
+      () => new THREE.WebGLRenderer({
+        antialias: true,
+        alpha: true
+      })
+    );
+
+    if (!renderer) {
+      viewControls.hidden = true;
+      viewerFallback.hidden = false;
+      throw rendererError;
+    }
 
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
     renderer.setSize(window.innerWidth, window.innerHeight);
