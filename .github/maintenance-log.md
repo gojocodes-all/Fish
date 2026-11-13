@@ -1,5 +1,45 @@
 # Maintenance log
 
+## 2026-11-13 — Explain unavailable WebGL instead of leaving dead controls
+
+### Rationale
+
+Creating a Three.js WebGL renderer can fail when WebGL is unavailable, hardware
+acceleration is disabled, or an embedded browser cannot create a graphics
+context. The uncaught failure previously stopped initialization while leaving
+the Rotate, Zoom, and Reset buttons enabled, so visitors received no explanation
+and every control silently did nothing.
+
+### Files changed
+
+- `interactive-3d-shoe-4.html` — catch renderer initialization failure, hide
+  the unusable controls, and show an accessible recovery message.
+- `assets/js/renderer-initialization.js` — isolate the renderer failure
+  boundary for deterministic testing.
+- `test/renderer-initialization.test.js` — cover successful, failed, and
+  invalid renderer factories.
+- `test/import-map.test.js` — keep the fallback markup and integration wired.
+- `README.md` — document the fallback behavior and new validation coverage.
+- `.github/maintenance-log.md` — record this maintenance work.
+
+### Validation
+
+- `npm test`
+- `git diff --check`
+- Reviewed the complete diff for normal WebGL behavior, fallback accessibility,
+  mobile layout, security, compatibility, and repository scope.
+
+### Risk
+
+Low. Successful WebGL initialization follows the existing scene, controls,
+animation, dependencies, and rendering path unchanged. Only failed renderer
+creation now receives a visible status instead of dead controls.
+
+### Rollback
+
+Revert this pull request's squash commit to restore uncaught renderer
+initialization failures and remove the focused fallback coverage.
+
 ## 2026-11-08 — Validate the inline browser module
 
 ### Rationale

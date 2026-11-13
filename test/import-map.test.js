@@ -30,6 +30,20 @@ test('loads OrbitControls through the mapped addon path', () => {
   );
 });
 
+test('shows an accessible fallback when WebGL renderer creation fails', () => {
+  assert.match(
+    html,
+    /import \{ createRendererSafely \} from ["']\.\/assets\/js\/renderer-initialization\.js["']/,
+  );
+  assert.match(
+    html,
+    /id=["']viewer-fallback["'][^>]+role=["']status["'][^>]+aria-labelledby=["']viewer-fallback-title["'][^>]+hidden/,
+  );
+  assert.match(html, /const \{ renderer, error: rendererError \} = createRendererSafely/);
+  assert.match(html, /if \(!renderer\)[\s\S]*?viewControls\.hidden = true/);
+  assert.match(html, /viewerFallback\.hidden = false/);
+});
+
 test('wires rendering to reduced-motion and page-visibility state', () => {
   assert.match(
     html,
